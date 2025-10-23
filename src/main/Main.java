@@ -4,10 +4,27 @@ import config.config;
 import java.util.Scanner;
 
 public class Main {
+    
+    
+    public static void viewborrow() {
+        String Query = "SELECT * FROM tbl_borrow";
+        String[] votersHeaders = {"BID", "Bok_ID", "UID", "B_DATE", "B_RETURN"};
+        String[] votersColumns = {"b_id", "bok_id", "u_id", "b_date", "b_return"};
+        config conf = new config();
+        conf.viewRecords(Query, votersHeaders, votersColumns);
+    }
+    
+    public static void viewbooks() {
+        String Query = "SELECT * FROM tbl_books";
+        String[] votersHeaders = {"BID", "Title", "Author"};
+        String[] votersColumns = {"bok_id", "bok_title", "bok_author"};
+        config conf = new config();
+        conf.viewRecords(Query, votersHeaders, votersColumns);
+    }
 
     public static void viewUsers() {
         String Query = "SELECT * FROM tbl_user";
-        String[] votersHeaders = {"UID", "Name","Email", "Status"};
+        String[] votersHeaders = {"UID", "Name", "Email", "Status"};
         String[] votersColumns = {"u_id", "u_name", "u_email", "u_status"};
         config conf = new config();
         conf.viewRecords(Query, votersHeaders, votersColumns);
@@ -28,61 +45,60 @@ public class Main {
 
             switch (choice) {
                 case 1:
-    System.out.println("Enter Email: ");
-    String em = sc.next();
-    System.out.println("Enter Password: ");
-    String pass = sc.next();
+                    System.out.println("Enter Email: ");
+                    String em = sc.next();
+                    System.out.println("Enter Password: ");
+                    String pass = sc.next();
 
-    // Check if email exists before password validation
-    String emailCheckQry = "SELECT * FROM tbl_user WHERE u_email = ?";
-    java.util.List<java.util.Map<String, Object>> emailCheckResult = conf.fetchRecords(emailCheckQry, em);
+                    // Check if email exists before password validation
+                    String emailCheckQry = "SELECT * FROM tbl_user WHERE u_email = ?";
+                    java.util.List<java.util.Map<String, Object>> emailCheckResult = conf.fetchRecords(emailCheckQry, em);
 
-    if (emailCheckResult.isEmpty()) {
-        System.out.println("Account is not registered. Please register first.");
-        break;  // Exit this case early
-    }
-
-    while (true) {
-        String qry = "SELECT * FROM tbl_user WHERE u_email = ? AND u_pass = ?";
-        java.util.List<java.util.Map<String, Object>> result = conf.fetchRecords(qry, em, pass);
-
-        if (result.isEmpty()) {
-            System.out.println("INVALID CREDENTIALS");
-            break;
-        } else {
-            java.util.Map<String, Object> user = result.get(0);
-            String stat = user.get("u_status").toString();
-            String type = user.get("u_type").toString();
-            if (stat.equals("Pending")) {
-                System.out.println("Account is Pending, Contact the Admin!");
-                break;
-            } else {
-                System.out.println("LOGIN SUCCESS!");
-                if (type.equals("Admin")) {
-                    System.out.println("WELCOME TO ADMIN DASHBOARD");
-                    System.out.println("1. Approve Account!");
-                    int respo = sc.nextInt();
-
-                    switch (respo) {
-                        case 1:
-                            viewUsers();
-                            System.out.print("Enter ID to Approve: ");
-                            int ids = sc.nextInt();
-
-                            String sql = "UPDATE tbl_user SET u_status = ? WHERE u_id = ?";
-                            conf.updateRecord(sql, "Approved", ids);
-                            break;
+                    if (emailCheckResult.isEmpty()) {
+                        System.out.println("Account is not registered. Please register first.");
+                        break;  // Exit this case early
                     }
-                } else if (type.equals("Librian")) {
-                    System.out.println("WELCOME TO TEACHER DASHBOARD");
-                    librianMenu();
-                }
-            }
-        }
-        break;
-    }
-    break;
 
+                    while (true) {
+                        String qry = "SELECT * FROM tbl_user WHERE u_email = ? AND u_pass = ?";
+                        java.util.List<java.util.Map<String, Object>> result = conf.fetchRecords(qry, em, pass);
+
+                        if (result.isEmpty()) {
+                            System.out.println("INVALID CREDENTIALS");
+                            break;
+                        } else {
+                            java.util.Map<String, Object> user = result.get(0);
+                            String stat = user.get("u_status").toString();
+                            String type = user.get("u_type").toString();
+                            if (stat.equals("Pending")) {
+                                System.out.println("Account is Pending, Contact the Admin!");
+                                break;
+                            } else {
+                                System.out.println("LOGIN SUCCESS!");
+                                if (type.equals("Admin")) {
+                                    System.out.println("WELCOME TO ADMIN DASHBOARD");
+                                    System.out.println("1. Approve Account!");
+                                    int respo = sc.nextInt();
+
+                                    switch (respo) {
+                                        case 1:
+                                            viewUsers();
+                                            System.out.print("Enter ID to Approve: ");
+                                            int ids = sc.nextInt();
+
+                                            String sql = "UPDATE tbl_user SET u_status = ? WHERE u_id = ?";
+                                            conf.updateRecord(sql, "Approved", ids);
+                                            break;
+                                    }
+                                } else if (type.equals("Librian")) {
+                                    System.out.println("WELCOME TO TEACHER DASHBOARD");
+                                    librianMenu();
+                                }
+                            }
+                        }
+                        break;
+                    }
+                    break;
 
                 case 2:
                     System.out.print("Enter user name: ");
@@ -140,7 +156,7 @@ public class Main {
 
         System.out.println("Thank you! Program ended.");
     }
-    
+
     public static void librianMenu() {
         Scanner sc = new Scanner(System.in);
         config conf = new config();
@@ -187,7 +203,6 @@ public class Main {
                             int id = sc.nextInt();
                             System.out.println("Enter new Name: ");
                             name = sc.next();
-                            
                             System.out.println("Enter new Email: ");
                             em = sc.next();
                             String qry = "UPDATE tbl_user SET u_name = ?, u_contact = ?, u_email = ? WHERE u_id = ?";
@@ -214,16 +229,127 @@ public class Main {
                     break;
 
                 case 2:
-                    System.out.println("Add Books functionality goes here...");
+                    int bookChoice;
+                    do {
+                        System.out.println("==== BOOK MENU ====");
+                        System.out.println("1. Add Book");
+                        System.out.println("2. View Books");
+                        System.out.println("3. Update Book");
+                        System.out.println("4. Delete Book");
+                        System.out.println("5. Back");
+                        System.out.print("Enter choice: ");
+                        bookChoice = sc.nextInt();
+
+                        switch (bookChoice) {
+                            case 1:
+                                System.out.print("Enter Book Title: ");
+                                String title = sc.next();
+                                System.out.println("Enter Author: ");
+                                String author = sc.next();
+                                
+                                String addBookSQL = "INSERT INTO tbl_books (bok_title, bok_author) VALUES (?, ?)";
+                                conf.addRecord(addBookSQL, title, author);
+                                System.out.println("Book added successfully!");
+                                break;
+
+                            case 2:
+                                viewbooks();
+                                break;
+
+                            case 3:
+                               viewbooks();
+                                
+                                System.out.print("Enter Book ID to Update: ");
+                                int bid = sc.nextInt();
+                                System.out.print("Enter New Title: ");
+                                title = sc.next();
+                                System.out.print("Enter New Author: ");
+                                author = sc.next();
+                                
+                                String updateBookSQL = "UPDATE tbl_books SET bok_title = ?, bok_author = ? WHERE bok_id = ?";
+                                conf.updateRecord(updateBookSQL, title, author, bid);
+                                System.out.println("Book updated successfully!");
+                                viewbooks();
+                                break;
+
+                            case 4:
+                                viewbooks();
+
+                                System.out.print("Enter Book ID to Delete: ");
+                                int delid = sc.nextInt();
+                                String deleteBookSQL = "DELETE FROM tbl_books WHERE bok_id = ?";
+                                conf.deleteRecord(deleteBookSQL, delid);
+                                System.out.println("Book deleted successfully!");
+                                viewbooks();
+                                break;
+
+                            case 5:
+                                System.out.println("Going back to main menu...");
+                                break;
+
+                            default:
+                                System.out.println("Invalid choice!");
+                        }
+                    } while (bookChoice != 5);
                     break;
 
                 case 3:
-                    System.out.println("Add Borrowed Book functionality goes here...");
-                    break;
+    int borrowChoice;
+    do {
+        System.out.println("==== BORROWED BOOK MENU ====");
+        System.out.println("1. Borrow a Book");
+        System.out.println("2. View Borrowed Books");
+        System.out.println("3. Return a Book");
+        System.out.println("4. Back");
+        System.out.print("Enter choice: ");
+        borrowChoice = sc.nextInt();
 
-                case 5:
-                    System.out.println("Exiting...");
-                    break;
+        switch (borrowChoice) {
+            case 1:
+                System.out.println("Select User:");
+                viewUsers();
+                System.out.print("Enter User ID: ");
+                int uid = sc.nextInt();
+
+                System.out.println("Select Book:");
+                viewbooks();
+                System.out.print("Enter Book ID: ");
+                int bid = sc.nextInt();
+
+                System.out.print("Enter Borrow Date: ");
+                int bdate = sc.nextInt();
+                System.out.print("Enter Return Date: ");
+                int rdate = sc.nextInt();
+
+                String addBorrowSQL = "INSERT INTO tbl_borrow (bok_id, u_id, b_date, b_return) VALUES (?, ?, ?, ?)";
+                conf.addRecord(addBorrowSQL, bid, uid, bdate, rdate);
+                System.out.println("Book borrowed successfully!");
+                break;
+
+            case 2:
+                viewborrow();
+                break;
+
+            case 3:
+                viewborrow();
+
+                System.out.print("Enter Borrow ID to delete (return): ");
+                int brid = sc.nextInt();
+                String deleteBorrowSQL = "DELETE FROM tbl_borrow WHERE b_id = ?";
+                conf.deleteRecord(deleteBorrowSQL, brid);
+                System.out.println("Book marked as returned (record deleted)!");
+                viewborrow();
+                break;
+
+            case 4:
+                System.out.println("Going back to main menu...");
+                break;
+
+            default:
+                System.out.println("Invalid choice!");
+        }
+                    } while (borrowChoice != 4);
+                break;
 
                 default:
                     System.out.println("Invalid choice!");
@@ -231,5 +357,5 @@ public class Main {
             }
         } while (choice != 5);
     }
-
 }
+
