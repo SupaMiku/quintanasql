@@ -202,35 +202,50 @@ public class Main {
 
         do {
             System.out.println("==== MAIN MENU ====");
-            System.out.println("1. Add User: ");
+            System.out.println("1. Add Reader: ");
             System.out.println("2. Add Books: ");
             System.out.println("3. Add Borrowed Book: ");
-            System.out.println("4. Add Customer (Reader): ");
-            System.out.println("5. Exit ");
+            System.out.println("4. Exit ");
             System.out.print("Enter Choice: ");
             choice = sc.nextInt();
 
             switch (choice) {
                 case 1:
                     int userchoice;
+                  do{  
                     System.out.println("==== USER MENU ====");
-                    System.out.println("1. Add User");
-                    System.out.println("2. View User");
-                    System.out.println("3. Update User");
-                    System.out.println("4. Delete User");
+                    System.out.println("1. Add Reader");
+                    System.out.println("2. View Readers");
+                    System.out.println("3. Update Readers");
+                    System.out.println("4. Delete Readers");
                     System.out.println("5. Back");
+                    System.out.println("Enter Choice: ");
                     userchoice = sc.nextInt();
 
                     switch (userchoice) {
                         case 1:
-                            System.out.println("Enter Name: ");
-                            String name = sc.next();
-                            System.out.println("Enter Email: ");
-                            String em = sc.next();
+                            System.out.println("==== ADD READER (CUSTOMER) ====");
+                    System.out.println("Enter Reader Name: ");
+                    String readerName = sc.next();
+                    System.out.println("Enter Reader Email: ");
+                    String readerEmail = sc.next();
 
-                            String sql = "INSERT INTO tbl_user (u_name, u_email) VALUES (?, ?)";
-                            conf.addRecord(sql, name, em);
+                    while (true) {
+                        String qry = "SELECT * FROM tbl_user WHERE u_email = ?";
+                        java.util.List<java.util.Map<String, Object>> result = conf.fetchRecords(qry, readerEmail);
+
+                        if (result.isEmpty()) {
                             break;
+                        } else {
+                            System.out.println("Email Already Exists! Enter another email: ");
+                            readerEmail = sc.next();
+                        }
+                    }
+
+                    String readerSql = "INSERT INTO tbl_user(u_name, u_email, u_type, u_status, u_pass) VALUES (?, ?, ?, ?, ?)";
+                    conf.addRecord(readerSql, readerName, readerEmail, "Customer", "Customer", "defaultPassword");
+                    System.out.println("Reader (Customer) added successfully!");
+                    break;
 
                         case 2:
                             viewUsers();
@@ -241,9 +256,9 @@ public class Main {
                             System.out.println("Enter id to update: ");
                             int id = sc.nextInt();
                             System.out.println("Enter new Name: ");
-                            name = sc.next();
+                            String name = sc.next();
                             System.out.println("Enter new Email: ");
-                            em = sc.next();
+                            String em = sc.next();
                             String qry = "UPDATE tbl_user SET u_name = ?, u_contact = ?, u_email = ? WHERE u_id = ?";
                             conf.updateRecord(qry, name, em, id);
                             viewUsers();
@@ -265,6 +280,8 @@ public class Main {
                         default:
                             System.out.println("Invalid Choice!");
                     }
+                  }while(userchoice !=5);
+        
                     break;
 
                 case 2:
@@ -273,8 +290,8 @@ public class Main {
                         System.out.println("==== BOOK MENU ====");
                         System.out.println("1. Add Book");
                         System.out.println("2. View Books");
-                        System.out.println("3. Update Book");
-                        System.out.println("4. Delete Book");
+                        System.out.println("3. Update Books");
+                        System.out.println("4. Delete Books");
                         System.out.println("5. Back");
                         System.out.print("Enter choice: ");
                         bookChoice = sc.nextInt();
@@ -336,7 +353,7 @@ public class Main {
                         System.out.println("==== BORROWED BOOK MENU ====");
                         System.out.println("1. Borrow a Book");
                         System.out.println("2. View Borrowed Books");
-                        System.out.println("3. Return a Book");
+                        System.out.println("3. Return a Books");
                         System.out.println("4. Back");
                         System.out.print("Enter choice: ");
                         borrowChoice = sc.nextInt();
@@ -392,37 +409,15 @@ public class Main {
                     } while (borrowChoice != 4);
                     break;
 
+                
+
                 case 4:
-                    System.out.println("==== ADD READER (CUSTOMER) ====");
-                    System.out.println("Enter Reader Name: ");
-                    String readerName = sc.next();
-                    System.out.println("Enter Reader Email: ");
-                    String readerEmail = sc.next();
-
-                    while (true) {
-                        String qry = "SELECT * FROM tbl_user WHERE u_email = ?";
-                        java.util.List<java.util.Map<String, Object>> result = conf.fetchRecords(qry, readerEmail);
-
-                        if (result.isEmpty()) {
-                            break;
-                        } else {
-                            System.out.println("Email Already Exists! Enter another email: ");
-                            readerEmail = sc.next();
-                        }
-                    }
-
-                    String readerSql = "INSERT INTO tbl_user(u_name, u_email, u_type, u_status, u_pass) VALUES (?, ?, ?, ?, ?)";
-                    conf.addRecord(readerSql, readerName, readerEmail, "Customer", "Customer", "defaultPassword");
-                    System.out.println("Reader (Customer) added successfully!");
-                    break;
-
-                case 5:
                     System.out.println("Exiting...");
                     break;
 
                 default:
                     System.out.println("Invalid choice!");
             }
-        } while (choice != 5);
+        } while (choice != 4);
     }
 }
